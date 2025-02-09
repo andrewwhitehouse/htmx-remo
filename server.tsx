@@ -35,6 +35,10 @@ function dogRow(dog: Dog) {
 }
 
 const app = new Hono();
+app.get('/version', (c: Context) => {
+    return c.html(<img alt="some description" src="https://raw.githubusercontent.com/bigskysoftware/htmx/master/www/static/img/htmx_logo.1.png" />);
+});
+    
 app.use('/*', serveStatic({root: './'}));
 app.get('/table-rows', (c: Context) => {
     const sortedDogs = Array.from(dogs.values()).toSorted((a,b) => 
