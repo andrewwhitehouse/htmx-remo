@@ -17,17 +17,19 @@ addDog('Oscar', 'German Shorthaired Pointer');
 function dogRow(dog: Dog) {
     return (
         <tr class="on-hover">
-            <td>${dog.name}</td>
-            <td>${dog.breed}</td>
-            <button
-                class="show-on-hover"
-                hx-delete={`/dog/${dog.id}`}
-                hx-confirm="Are you sure?"
-                hx-target="closest tr"
-                hx-swap="delete"
-            >
-                ✕    
-            </button>
+            <td>{dog.name}</td>
+            <td>{dog.breed}</td>
+            <td class="buttons">
+                <button
+                    class="show-on-hover"
+                    hx-delete={`/dog/${dog.id}`}
+                    hx-confirm="Are you sure?"
+                    hx-target="closest tr"
+                    hx-swap="delete"
+                >
+                    ✕    
+               </button>
+            </td>        
         </tr>
     );
 }
@@ -45,6 +47,7 @@ app.post('/dog', async (c: Context) => {
     const name = (formData.get('name') as string) || '';
     const breed = (formData.get('breed') as string) || '';
     const dog = addDog(name, breed);
+    console.log(JSON.stringify(dog));
     return c.html(dogRow(dog), 201);
 });
 app.delete('/dog/:id', (c: Context) => {
