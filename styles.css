@@ -74,3 +74,7 @@ td {
 th {
   background-color: orange;
 }
+
+form label {
+  width: 80;
+}

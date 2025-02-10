@@ -1,28 +1,29 @@
 import {type Context, Hono} from 'hono';
 import {serveStatic} from 'hono/bun';
 
-type Dog = {id: string; name: string; breed: string};
-const dogs = new Map<string, Dog>();
+type Book = {id: string; name: string; author: string; yearPublished?: number};
+const books = new Map<string, Book>();
 
-function addDog(name: string, breed: string): Dog {
+function addBook(name: string, author: string, yearPublished?: number): Book {
     const id = crypto.randomUUID();
-    const dog = {id, name, breed};
-    dogs.set(id, dog);
-    return dog;
+    const book = {id, name, author, yearPublished};
+    books.set(id, book);
+    return book;
 }
 
-addDog('Comet', 'Whippet');
-addDog('Oscar', 'German Shorthaired Pointer');
+addBook('Great Expectations', 'Charles Dickens');
+addBook('Will It Fly?', 'Bloke', 2010);
 
-function dogRow(dog: Dog) {
+function bookRow(book: Book) {
     return (
         <tr class="on-hover">
-            <td>{dog.name}</td>
-            <td>{dog.breed}</td>
+            <td>{book.name}</td>
+            <td>{book.author}</td>
+            <td>{book.yearPublished}</td>
             <td class="buttons">
                 <button
                     class="show-on-hover"
-                    hx-delete={`/dog/${dog.id}`}
+                    hx-delete={`/book/${book.id}`}
                     hx-confirm="Are you sure?"
                     hx-target="closest tr"
                     hx-swap="delete"
@@ -41,22 +42,23 @@ app.get('/version', (c: Context) => {
     
 app.use('/*', serveStatic({root: './'}));
 app.get('/table-rows', (c: Context) => {
-    const sortedDogs = Array.from(dogs.values()).toSorted((a,b) => 
+    const sortedDogs = Array.from(books.values()).toSorted((a,b) => 
         a.name.localeCompare(b.name)  
     );
-    return c.html(<>{sortedDogs.map(dogRow)}</>);  
+    return c.html(<>{sortedDogs.map(bookRow)}</>);  
 });
-app.post('/dog', async (c: Context) => {
+app.post('/book', async (c: Context) => {
     const formData = await c.req.formData();
     const name = (formData.get('name') as string) || '';
-    const breed = (formData.get('breed') as string) || '';
-    const dog = addDog(name, breed);
+    const author = (formData.get('author') as string) || '';
+    const yearPublished = (formData.get('yearPublished') as string) || undefined;
+    const dog = addBook(name, author, typeof(yearPublished) !== 'undefined' ? parseInt(yearPublished) : undefined);
     console.log(JSON.stringify(dog));
-    return c.html(dogRow(dog), 201);
+    return c.html(bookRow(dog), 201);
 });
-app.delete('/dog/:id', (c: Context) => {
+app.delete('/book/:id', (c: Context) => {
     const id = c.req.param('id');
-    dogs.delete(id);
+    books.delete(id);
     return c.body(null);
 });
 
