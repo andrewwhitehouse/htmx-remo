@@ -9,3 +9,10 @@ bun run dev
 ```
 
 open http://localhost:3000
+
+# Bun Compatibility issue
+
+https://www.sqlitetutorial.net/sqlite-bun/connect/
+
+https://www.sqlitetutorial.net/sqlite-bun/
+

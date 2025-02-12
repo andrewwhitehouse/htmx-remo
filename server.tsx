@@ -1,18 +1,16 @@
 import {type Context, Hono} from 'hono';
 import {serveStatic} from 'hono/bun';
+import { Database } from "bun:sqlite";
+import {init as initBook, create as createBook, del as deleteBook, Book, findAll} from './db/book';
 
-type Book = {id: string; name: string; author: string; yearPublished?: number};
-const books = new Map<string, Book>();
+const db = initBook();
 
 function addBook(name: string, author: string, yearPublished?: number): Book {
     const id = crypto.randomUUID();
     const book = {id, name, author, yearPublished};
-    books.set(id, book);
+    createBook(db, book);
     return book;
 }
-
-addBook('Great Expectations', 'Charles Dickens');
-addBook('Will It Fly?', 'Bloke', 2010);
 
 function bookRow(book: Book) {
     return (
@@ -42,10 +40,7 @@ app.get('/version', (c: Context) => {
     
 app.use('/*', serveStatic({root: './'}));
 app.get('/table-rows', (c: Context) => {
-    const sortedDogs = Array.from(books.values()).toSorted((a,b) => 
-        a.name.localeCompare(b.name)  
-    );
-    return c.html(<>{sortedDogs.map(bookRow)}</>);  
+    return c.html(<>{findAll(db).map(bookRow)}</>);  
 });
 app.post('/book', async (c: Context) => {
     const formData = await c.req.formData();
@@ -58,7 +53,7 @@ app.post('/book', async (c: Context) => {
 });
 app.delete('/book/:id', (c: Context) => {
     const id = c.req.param('id');
-    books.delete(id);
+    deleteBook(db, id);
     return c.body(null);
 });
 
